@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<head>
+    <title>WebRTC training</title>
+</head>
+<body>
+    <h1>WEBRTC TRAINING</h1>
+    <div id="selectRoom">
+        <label>Type room name</label>
+        <input id="roomNumber" type="text"/>
+        <button id="goRoom">Go</button>
+    </div>
+    <div id="consultingRoom" style="display:none">
+        <video id="localVideo" autoplay></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="main.js"></script>
+</body>
