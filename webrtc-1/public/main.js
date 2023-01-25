@@ -95,6 +95,8 @@ socket.on('ready', () => {
 socket.on('offer', (event) => {
     if(!isCaller){
         console.log('received offer', event);
+        // add new video element
+        addVideoElement( divConsultingRoom.childElementCount );
         // gets public IP of this machine and sets up P2P connection
         rtcPeerConnection = new RTCPeerConnection(iceServers);
         rtcPeerConnection.oniceCandidate = oniceCandidate;
@@ -137,13 +139,23 @@ socket.on('candidate', event => {
     rtcPeerConnection.addIceCandidate(candidate);
 })
 
+function addVideoElement( numParticipants ) {
+    newVideo = document.createElement('video');
+    newVideo.setAttribute('id', 'remoteVideo');
+    newVideo.autoplay = true;
+    newVideo.controls = true;
+    newVideo.height = 300;
+    newVideo.width = 300;
+    divConsultingRoom.appendChild(newVideo);
+}
+
 // add remote stream we have received as a new video element to our webpage
 function addStream(event) {
     console.log('adding remote stream video', event);
-    remoteVideo.srcObject = event.streams[0];
+    remoteVideo = document.getElementById('remoteVideo');
+    removeVideo.srcObject = event.streams[0];
     remoteStream = event.streams[0];
     console.log('remote video object added', remoteVideo.srcObject);
-    console.log('local video object is ', localVideo.srcObject);
 }
 
 // callers finds an ICE candidate (valid IP address or TURN server) for the client who just joined the call
