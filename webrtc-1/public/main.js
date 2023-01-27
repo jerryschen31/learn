@@ -66,28 +66,9 @@ socket.on('joined', room => {
 // additional user has joined the call - client who is the caller receives ready signal
 socket.on('ready', () => {
     if(isCaller){
-        // gets public IP of this machine and sets up P2P connection
-        rtcPeerConnection = new RTCPeerConnection(iceServers);
-        rtcPeerConnection.oniceCandidate = oniceCandidate;
-        rtcPeerConnection.ontrack = addStream;
-        // video track
-        rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
-        // audio track
-        rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream)
-        // create and send offer -> returns Promise with session description (sdp)        
-        rtcPeerConnection.createOffer()
-            .then(sessionDescription => {
-                console.log('sending offer', sessionDescription);
-                rtcPeerConnection.setLocalDescription(sessionDescription);
-                socket.emit('offer', {
-                    type: 'offer',
-                    sdp: sessionDescription,
-                    room: roomNumber,                
-                })
-            })
-            .catch( err=> {
-                console.log(err);
-            })
+        // add new video element for remote video once offer/answer is done
+        addVideoElement( divConsultingRoom.childElementCount );
+        sendOffer(socket, localStream, iceServers, roomNumber);
     }
 })
 
@@ -97,30 +78,7 @@ socket.on('offer', (event) => {
         console.log('received offer', event);
         // add new video element
         addVideoElement( divConsultingRoom.childElementCount );
-        // gets public IP of this machine and sets up P2P connection
-        rtcPeerConnection = new RTCPeerConnection(iceServers);
-        rtcPeerConnection.oniceCandidate = oniceCandidate;
-        rtcPeerConnection.ontrack = addStream;
-        // video track
-        rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
-        // audio track
-        rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream)
-        // set remote sdp
-        rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event));
-        // create and send answer -> returns Promise with session description (sdp)
-        rtcPeerConnection.createAnswer()
-            .then(sessionDescription => {    
-                console.log('sending answer', sessionDescription);
-                rtcPeerConnection.setLocalDescription(sessionDescription);
-                socket.emit('answer', {
-                    type: 'answer',
-                    sdp: sessionDescription,
-                    room: roomNumber,                
-                })
-            })
-            .catch( err=> {
-                console.log(err);
-            })
+        handleOffer(socket, event, localStream, iceServers);
     }
 })
 
@@ -151,15 +109,15 @@ function addVideoElement( numParticipants ) {
 
 // add remote stream we have received as a new video element to our webpage
 function addStream(event) {
+    let remoteVideo = document.getElementById('remoteVideo');
     console.log('adding remote stream video', event);
-    remoteVideo = document.getElementById('remoteVideo');
-    removeVideo.srcObject = event.streams[0];
+    remoteVideo.srcObject = event.streams[0];
     remoteStream = event.streams[0];
     console.log('remote video object added', remoteVideo.srcObject);
 }
 
 // callers finds an ICE candidate (valid IP address or TURN server) for the client who just joined the call
-function oniceCandidate(event){
+async function oniceCandidate(event){
     if(event.candidate){
         console.log('sending ice candidate', event.candidate);
         socket.emit('candidate', {
@@ -170,4 +128,57 @@ function oniceCandidate(event){
             room: roomNumber,
         })
     }
+}
+
+// creates a peer connection
+async function createPeerConnection(localStream, iceServers){
+    // gets public IP of this machine and sets up P2P connection
+    let rtcPeerConnection = new RTCPeerConnection(iceServers);
+    rtcPeerConnection.oniceCandidate = oniceCandidate;
+    rtcPeerConnection.ontrack = addStream;
+    // video track
+    rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
+    // audio track
+    rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
+    return rtcPeerConnection;
+}
+
+// remote partcipant handles offer and sends answer
+async function handleOffer(socket, event, localStream, iceServers){
+    let rtcPeerConnection = await createPeerConnection(localStream, iceServers);
+    // set remote sdp
+    await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event));
+    // create and send answer -> returns Promise with session description (sdp)
+    rtcPeerConnection.createAnswer()
+        .then(sessionDescription => {    
+            console.log('sending answer', sessionDescription);
+            rtcPeerConnection.setLocalDescription(sessionDescription);
+            socket.emit('answer', {
+                type: 'answer',
+                sdp: sessionDescription,
+                room: roomNumber,                
+            })
+        })
+        .catch( err=> {
+            console.log(err);
+        })    
+}
+
+// caller creates an offer
+async function sendOffer(socket, localStream, iceServers, roomNumber){
+    let rtcPeerConnection = await createPeerConnection(localStream, iceServers);
+    // create and send offer -> returns Promise with session description (sdp)        
+    rtcPeerConnection.createOffer()
+        .then(sessionDescription => {
+            console.log('sending offer', sessionDescription);
+            rtcPeerConnection.setLocalDescription(sessionDescription);
+            socket.emit('offer', {
+                type: 'offer',
+                sdp: sessionDescription,
+                room: roomNumber,                
+            })
+        })
+        .catch( err=> {
+            console.log(err);
+        })    
 }
