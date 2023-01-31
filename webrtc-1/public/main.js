@@ -68,7 +68,7 @@ socket.on('ready', () => {
     if(isCaller){
         // add new video element for remote video once offer/answer is done
         addVideoElement( divConsultingRoom.childElementCount );
-        sendOffer(socket, localStream, iceServers, roomNumber);
+        sendOffer(socket, localStream, iceServers, roomNumber, rtcPeerConnection);
     }
 })
 
@@ -84,7 +84,7 @@ socket.on('offer', (event) => {
 
 socket.on('answer', event => {
     console.log('received answer', event);
-    rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event));
+    handleAnswer(event, rtcPeerConnection);
 })
 
 // add ICE candidate (IP address or TURN server IP) to RTC peer connection
@@ -114,6 +114,7 @@ function addStream(event) {
     remoteVideo.srcObject = event.streams[0];
     remoteStream = event.streams[0];
     console.log('remote video object added', remoteVideo.srcObject);
+    return false;
 }
 
 // callers finds an ICE candidate (valid IP address or TURN server) for the client who just joined the call
@@ -131,14 +132,14 @@ async function oniceCandidate(event){
 }
 
 // creates a peer connection
-async function createPeerConnection(localStream, iceServers){
+async function createPeerConnection(localStream, iceServers, rtcPeerConnection){
     // gets public IP of this machine and sets up P2P connection
-    let rtcPeerConnection = new RTCPeerConnection(iceServers);
+    rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.oniceCandidate = oniceCandidate;
     rtcPeerConnection.ontrack = addStream;
-    // video track
+    // video track - add to local stream
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
-    // audio track
+    // audio track - add to local stream 
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
     return rtcPeerConnection;
 }
@@ -165,8 +166,8 @@ async function handleOffer(socket, event, localStream, iceServers){
 }
 
 // caller creates an offer
-async function sendOffer(socket, localStream, iceServers, roomNumber){
-    let rtcPeerConnection = await createPeerConnection(localStream, iceServers);
+async function sendOffer(socket, localStream, iceServers, roomNumber, rtcPeerConnection){
+    rtcPeerConnection = await createPeerConnection(localStream, iceServers);
     // create and send offer -> returns Promise with session description (sdp)        
     rtcPeerConnection.createOffer()
         .then(sessionDescription => {
@@ -181,4 +182,8 @@ async function sendOffer(socket, localStream, iceServers, roomNumber){
         .catch( err=> {
             console.log(err);
         })    
+}
+
+async function handleAnswer( event, rtcPeerConnection){
+    await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event));
 }
