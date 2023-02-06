@@ -16,6 +16,7 @@ let io = require('socket.io')(http)
 //static hosting of files in public folder
 app.use(express.static('public'));
 
+// call method listen() on the HTTP object to listen for messages on specified portß
 http.listen(port, () => {
     console.log('listening on ', port);
 });
