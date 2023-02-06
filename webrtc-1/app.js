@@ -1,13 +1,19 @@
+/****************
+ This is the signaling server used to establish a connection between two devices.
+ Server uses Express as its server framework and Socket.io for relaying messages.
+ ****************/
+
+// creates a new instance of the Express web application framework and a NodeJS HTTP Server object. Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications. It is used to create server-side applications and APIs, and can be used with other frameworks such as React, Angular, and Vue.
 const express = require('express');
 const app = express();
 let http = require('http').Server(app);
 
 const port = process.env.PORT || 3000;
 
-// specify a server that will use socket.io
+// new http server object "io" uses socket.io
 let io = require('socket.io')(http)
 
-//static hosting of public folder
+//static hosting of files in public folder
 app.use(express.static('public'));
 
 http.listen(port, () => {
