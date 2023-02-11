@@ -16,16 +16,17 @@ let io = require('socket.io')(http)
 //static hosting of files in public folder
 app.use(express.static('public'));
 
-// call method listen() on the HTTP object to listen for messages on specified portß
+// call method listen() on the HTTP object to listen for messages on specified port
 http.listen(port, () => {
     console.log('listening on ', port);
 });
 
-// signalling server
+// signalling server - responds to a socket connection on HTTP port (connection request from client browser)
 io.on('connection', socket => {
     console.log('a user connected');
 
-    // listener
+    // [TODO] What is a socket?
+    // responds to 'create or join' message from client browser
     socket.on('create or join', room => {
         console.log('create or join to room', room);
         console.log('io.sockets keys', io.sockets.sockets.keys());
