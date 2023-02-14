@@ -1,0 +1,4 @@
+feature_flags:
+  new_feature_enabled: true
+  feature_x_enabled: false
+  feature_y_enabled: true
