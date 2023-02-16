@@ -1,3 +1,4 @@
+// HTML elements
 let divSelectRoom = document.getElementById('selectRoom');
 let divConsultingRoom = document.getElementById('consultingRoom');
 let inputRoomNumber = document.getElementById('roomNumber');
@@ -7,6 +8,7 @@ let remoteVideo = document.getElementById('remoteVideo');
 
 let roomNumber, localStream, remoteStream, rtcPeerConnection, isCaller;
 
+// STUN servers used by client browser for identifying this client public IP address+port(s), and if it's accessible for streaming
 const iceServers = {
     'iceServer': [
         {'urls': 'stun:stun.services.mozilla.com'},
@@ -19,9 +21,10 @@ const streamConstraints = {
     video: true,
 }
 
-// create a connection to the signalling server (the URL typed into the browser)
+// create a connection to the signaling server (the URL typed into the browser)
 const socket = io();
 
+// when client clicks on the "Join Room" button, client browser emits a 'create or join' message back to the signaling server
 btnGoRoom.onclick = () => {
     console.log('in onClick()');
     if(inputRoomNumber.value === ''){
