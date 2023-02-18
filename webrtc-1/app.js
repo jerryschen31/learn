@@ -55,7 +55,9 @@ io.on('connection', socket => {
         }
     })
 
+    // after second+ clients join room, they send 'ready' msg to signaling server
     socket.on('ready', room => {
+        // let all joined clients know that the room is ready
         socket.broadcast.to(room).emit('ready');
     })
 

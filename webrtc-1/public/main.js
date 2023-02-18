@@ -68,10 +68,11 @@ socket.on('joined', room => {
         })
 });
 
-// additional user has joined the call - client who is the caller receives ready signal
+// additional user has joined the call - all joined clients receive a ready message
 socket.on('ready', () => {
     if(isCaller){
-        // add new video element for remote video once offer/answer is done
+        // first client (caller) creates a new empty video for the additional user and sends an Offer to connect to the second client
+        // [TODO] expand this to work for 3+ clients (this currently only works for 2 clients)
         addVideoElement( divConsultingRoom.childElementCount );
         sendOffer(socket, localStream, iceServers, roomNumber);
     }
@@ -102,6 +103,7 @@ socket.on('candidate', event => {
     rtcPeerConnection.addIceCandidate(candidate);
 })
 
+// add a new video element to the HTML div containing all video elements
 function addVideoElement( numParticipants ) {
     newVideo = document.createElement('video');
     newVideo.setAttribute('id', 'remoteVideo');
