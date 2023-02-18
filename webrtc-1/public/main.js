@@ -37,9 +37,10 @@ btnGoRoom.onclick = () => {
     }
 }
 
+// once the first client browser connects to the signaling server, the client receives back a "created" signal
 socket.on('created', room => {
     console.log('created room', room);
-    // getUserMedia returns a promise with the stream
+    // since room has been created and this socket is connected to that room, client browser can now open up a video stream
     navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
             localStream = stream;
@@ -51,9 +52,10 @@ socket.on('created', room => {
         })
 });
 
+// once the second+ client browser connects to the signaling server, the client receives a "joined" signal
 socket.on('joined', room => {
     console.log('joined room', room);
-    // getUserMedia returns a promise with the stream
+    // since this socket is connected to the room, client browser can now open up a video stream and let the signaling server its ready
     navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
             localStream = stream;
