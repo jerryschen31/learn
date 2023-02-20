@@ -150,6 +150,27 @@ async function createPeerConnection(localStream, iceServers){
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
 }
 
+
+// first client (caller) creates an offer and sends it to the second+ client
+async function sendOffer(socket, localStream, iceServers, roomNumber){
+    // create everything on this (caller) end for establishing a P2P connection - get public IP, video stream,...
+    await createPeerConnection(localStream, iceServers);
+    // create and send offer -> returns Promise with session description (sdp)        
+    rtcPeerConnection.createOffer()
+        .then(sessionDescription => {
+            console.log('sending offer', sessionDescription);
+            rtcPeerConnection.setLocalDescription(sessionDescription);
+            socket.emit('offer', {
+                type: 'offer',
+                sdp: sessionDescription,
+                room: roomNumber,                
+            })
+        })
+        .catch( err=> {
+            console.log(err);
+        })    
+}
+
 // remote partcipant handles offer and sends answer
 async function handleOffer(socket, event, localStream, iceServers){
     await createPeerConnection(localStream, iceServers);
@@ -162,25 +183,6 @@ async function handleOffer(socket, event, localStream, iceServers){
             rtcPeerConnection.setLocalDescription(sessionDescription);
             socket.emit('answer', {
                 type: 'answer',
-                sdp: sessionDescription,
-                room: roomNumber,                
-            })
-        })
-        .catch( err=> {
-            console.log(err);
-        })    
-}
-
-// caller creates an offer
-async function sendOffer(socket, localStream, iceServers, roomNumber){
-    await createPeerConnection(localStream, iceServers);
-    // create and send offer -> returns Promise with session description (sdp)        
-    rtcPeerConnection.createOffer()
-        .then(sessionDescription => {
-            console.log('sending offer', sessionDescription);
-            rtcPeerConnection.setLocalDescription(sessionDescription);
-            socket.emit('offer', {
-                type: 'offer',
                 sdp: sessionDescription,
                 room: roomNumber,                
             })
