@@ -140,14 +140,16 @@ async function oniceCandidate(event){
 
 // creates a peer connection
 async function createPeerConnection(localStream, iceServers){
-    // gets public IP of this machine and sets up P2P connection
+    // gets public IP of this machine -> need this for setting up P2P connection with a remote peer
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.oniceCandidate = oniceCandidate;
+    // sets up event handler for appropriately handling audio/video streams
     rtcPeerConnection.ontrack = addStream;
     // video track - add to local stream
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
     // audio track - add to local stream 
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
+    console.log(rtcPeerConnection);
 }
 
 
