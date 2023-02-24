@@ -138,7 +138,7 @@ async function oniceCandidate(event){
     }
 }
 
-// creates a peer connection
+// RTC peer connection object contains info on this client (public IP, stream info,...) that will be sent to the other client(s)
 async function createPeerConnection(localStream, iceServers){
     // gets public IP of this machine -> need this for setting up P2P connection with a remote peer
     rtcPeerConnection = new RTCPeerConnection(iceServers);
