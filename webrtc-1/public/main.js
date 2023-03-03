@@ -173,10 +173,11 @@ async function sendOffer(socket, localStream, iceServers, roomNumber){
         })    
 }
 
-// remote partcipant handles offer and sends answer
+// remote client handles offer and sends answer
 async function handleOffer(socket, event, localStream, iceServers){
+    // remote client sets up its network and stream stuff so that it can connect to caller client 
     await createPeerConnection(localStream, iceServers);
-    // set remote sdp
+    // set remote session info from the offer event info received from the caller client
     await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event));
     // create and send answer -> returns Promise with session description (sdp)
     rtcPeerConnection.createAnswer()
