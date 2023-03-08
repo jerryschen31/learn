@@ -43,8 +43,9 @@ socket.on('created', room => {
     // since room has been created and this socket is connected to that room, client browser can now open up a video stream
     navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
-            localStream = stream;
-            localVideo.srcObject = stream;
+            addStream( stream, 'local' );
+            // localStream = stream;
+            // localVideo.srcObject = stream;
             isCaller = true;
         })
         .catch(err => {
@@ -58,8 +59,9 @@ socket.on('joined', room => {
     // since this socket is connected to the room, client browser can now open up a video stream and let the signaling server its ready
     navigator.mediaDevices.getUserMedia(streamConstraints)
         .then(stream => {
-            localStream = stream;
-            localVideo.srcObject = stream;
+            addStream( stream, 'local' );
+            // localStream = stream;
+            // localVideo.srcObject = stream;
             isCaller = false;
             socket.emit('ready', room);            
         })
@@ -73,7 +75,7 @@ socket.on('ready', () => {
     if(isCaller){
         // first client (caller) creates a new empty video for the additional user and sends an Offer to connect to the second client
         // [TODO] expand this to work for 3+ clients (this currently only works for 2 clients)
-        addVideoElement( divConsultingRoom.childElementCount );
+        addVideoElement( 'remoteVideo' );
         sendOffer(socket, localStream, iceServers, roomNumber);
     }
 })
@@ -83,7 +85,8 @@ socket.on('offer', (event) => {
     if(!isCaller){
         console.log('received offer', event);
         // add new video element
-        addVideoElement( divConsultingRoom.childElementCount );
+        addVideoElement( 'remoteVideo' );
+        addStream( event, 'remote' ); // is this where I add the remote stream?
         handleOffer(socket, event, localStream, iceServers);
     }
 })
@@ -104,22 +107,25 @@ socket.on('candidate', event => {
 })
 
 // add a new video element to the HTML div containing all video elements
-function addVideoElement( numParticipants ) {
+function addVideoElement( elementId ) {
     newVideo = document.createElement('video');
-    newVideo.setAttribute('id', 'remoteVideo');
+    // newVideo = document.getElementById( elementId );
+    newVideo.setAttribute('id', elementId);
     newVideo.autoplay = true;
     newVideo.controls = true;
     newVideo.height = 300;
     newVideo.width = 300;
     divConsultingRoom.appendChild(newVideo);
+    return newVideo
 }
 
 // add remote stream we have received as a new video element to our webpage
 function addStream(event) {
-    let remoteVideo = document.getElementById('remoteVideo');
+    // let remoteVideo = addVideoElement( elementId );
     console.log('adding remote stream video', event);
     remoteVideo.srcObject = event.streams[0];
     remoteStream = event.streams[0];
+    hangupButton.disabled = false;
     console.log('remote video object added', remoteVideo.srcObject);
     return false;
 }
@@ -142,13 +148,14 @@ async function oniceCandidate(event){
 async function createPeerConnection(localStream, iceServers){
     // gets public IP of this machine -> need this for setting up P2P connection with a remote peer
     rtcPeerConnection = new RTCPeerConnection(iceServers);
-    rtcPeerConnection.oniceCandidate = oniceCandidate;
-    // sets up event handler for appropriately handling audio/video streams
-    rtcPeerConnection.ontrack = addStream;
     // video track - add to local stream
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
     // audio track - add to local stream 
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
+    // sets up event handler for appropriately handling audio/video streams
+    rtcPeerConnection.ontrack = addStream;
+    // sets up event handler for receiving an ICE candidate (IP address for comm w other peer)
+    rtcPeerConnection.oniceCandidate = oniceCandidate;
     console.log(rtcPeerConnection);
 }
 
