@@ -1,0 +1,37 @@
+% kubectl get all -A -o wide
+NAMESPACE       NAME                                            READY   STATUS    RESTARTS      AGE   IP             NODE           NOMINATED NODE   READINESS GATES
+default         pod/my-app-podinfo-b7946bc58-66rj6              1/1     Running   0             16m   10.244.0.6     minikube       <none>           <none>
+default         pod/my-app-podinfo-b7946bc58-99576              1/1     Running   0             10s   10.244.0.9     minikube       <none>           <none>
+default         pod/my-app-podinfo-b7946bc58-gcqs9              1/1     Running   0             10m   10.244.0.7     minikube       <none>           <none>
+default         pod/my-app-podinfo-b7946bc58-tvv8t              1/1     Running   0             10m   10.244.0.8     minikube       <none>           <none>
+default         pod/my-app-podinfo-b7946bc58-x86xh              1/1     Running   0             10s   10.244.0.11    minikube       <none>           <none>
+default         pod/my-app-podinfo-b7946bc58-zvcc9              1/1     Running   0             10s   10.244.0.10    minikube       <none>           <none>
+ingress-nginx   pod/ingress-nginx-controller-6c7cd85885-z4tkx   1/1     Running   0             19m   10.244.0.4     minikube       <none>           <none>
+kube-system     pod/coredns-7d764666f9-jjbww                    1/1     Running   0             84m   10.244.0.2     minikube       <none>           <none>
+kube-system     pod/etcd-minikube                               1/1     Running   0             84m   192.168.49.2   minikube       <none>           <none>
+kube-system     pod/kube-apiserver-minikube                     1/1     Running   0             84m   192.168.49.2   minikube       <none>           <none>
+kube-system     pod/kube-controller-manager-minikube            1/1     Running   0             84m   192.168.49.2   minikube       <none>           <none>
+kube-system     pod/kube-proxy-96jbb                            1/1     Running   0             84m   192.168.49.2   minikube       <none>           <none>
+kube-system     pod/kube-proxy-wcm56                            1/1     Running   0             73s   192.168.49.3   minikube-m02   <none>           <none>
+kube-system     pod/kube-scheduler-minikube                     1/1     Running   0             84m   192.168.49.2   minikube       <none>           <none>
+kube-system     pod/storage-provisioner                         1/1     Running   1 (84m ago)   84m   192.168.49.2   minikube       <none>           <none>
+
+NAMESPACE       NAME                                         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE   SELECTOR
+default         service/kubernetes                           ClusterIP      10.96.0.1       <none>        443/TCP                      84m   <none>
+default         service/my-app-podinfo                       ClusterIP      10.97.128.0     <none>        9898/TCP,9999/TCP            16m   app.kubernetes.io/name=my-app-podinfo
+ingress-nginx   service/ingress-nginx-controller             LoadBalancer   10.108.189.42   127.0.0.1     80:31985/TCP,443:31896/TCP   19m   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+ingress-nginx   service/ingress-nginx-controller-admission   ClusterIP      10.105.64.19    <none>        443/TCP                      19m   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+kube-system     service/kube-dns                             ClusterIP      10.96.0.10      <none>        53/UDP,53/TCP,9153/TCP       84m   k8s-app=kube-dns
+
+NAMESPACE     NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE   CONTAINERS   IMAGES                               SELECTOR
+kube-system   daemonset.apps/kube-proxy   2         2         2       2            2           kubernetes.io/os=linux   84m   kube-proxy   registry.k8s.io/kube-proxy:v1.35.1   k8s-app=kube-proxy
+
+NAMESPACE       NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                                                                                     SELECTOR
+default         deployment.apps/my-app-podinfo             6/6     6            6           16m   podinfo      ghcr.io/stefanprodan/podinfo:6.14.1                                                                                        app.kubernetes.io/name=my-app-podinfo
+ingress-nginx   deployment.apps/ingress-nginx-controller   1/1     1            1           19m   controller   registry.k8s.io/ingress-nginx/controller:v1.15.1@sha256:594ceea76b01c592858f803f9ff4d2cb40542cae2060410b2c95f75907d659e1   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+kube-system     deployment.apps/coredns                    1/1     1            1           84m   coredns      registry.k8s.io/coredns/coredns:v1.13.1                                                                                    k8s-app=kube-dns
+
+NAMESPACE       NAME                                                  DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                                                                                     SELECTOR
+default         replicaset.apps/my-app-podinfo-b7946bc58              6         6         6       16m   podinfo      ghcr.io/stefanprodan/podinfo:6.14.1                                                                                        app.kubernetes.io/name=my-app-podinfo,pod-template-hash=b7946bc58
+ingress-nginx   replicaset.apps/ingress-nginx-controller-6c7cd85885   1         1         1       19m   controller   registry.k8s.io/ingress-nginx/controller:v1.15.1@sha256:594ceea76b01c592858f803f9ff4d2cb40542cae2060410b2c95f75907d659e1   app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx,pod-template-hash=6c7cd85885
+kube-system     replicaset.apps/coredns-7d764666f9                    1         1         1       84m   coredns      registry.k8s.io/coredns/coredns:v1.13.1                                                                                    k8s-app=kube-dns,pod-template-hash=7d764666f9
