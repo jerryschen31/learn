@@ -19,8 +19,8 @@ func Index[T comparable](s []T, x T) int {
 	return -1
 }
 
-// List represents a singly-linked list that holds
-// values of any type (generic types)
+// List represents a singly-linked list that holds values of any type (generic types)
+// So basic data structures are a classic use-case of objects and functions that accept generic and comparable types
 type List[T any] struct {
 	next *List[T]
 	val  T
